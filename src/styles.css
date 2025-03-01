@@ -18,3 +18,9 @@ button {
   font-size: 20px;
   margin-top: 10px;
 }
+
+#microphone-select {
+  margin-top: 20px;
+  padding: 10px;
+  font-size: 16px;
+}

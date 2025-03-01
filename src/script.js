@@ -1,5 +1,24 @@
 document.getElementById('start-note-button').addEventListener('click', playNote);
 document.getElementById('start-analyze-button').addEventListener('click', startAnalyzingInput);
+document.getElementById('microphone-select').addEventListener('change', updateSelectedMicrophone);
+
+let selectedMicrophoneId = null;
+
+navigator.mediaDevices.enumerateDevices().then(devices => {
+    const micSelect = document.getElementById('microphone-select');
+    devices.forEach(device => {
+        if (device.kind === 'audioinput') {
+            const option = document.createElement('option');
+            option.value = device.deviceId;
+            option.text = device.label || `Microphone ${micSelect.length + 1}`;
+            micSelect.appendChild(option);
+        }
+    });
+});
+
+function updateSelectedMicrophone(event) {
+    selectedMicrophoneId = event.target.value;
+}
 
 function playNote() {
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -19,8 +38,8 @@ function playNote() {
 }
 
 function startAnalyzingInput() {
-    // Request access to the microphone
-    navigator.mediaDevices.getUserMedia({ audio: true })
+    const constraints = { audio: { deviceId: selectedMicrophoneId ? { exact: selectedMicrophoneId } : undefined } };
+    navigator.mediaDevices.getUserMedia(constraints)
         .then(stream => {
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const microphone = audioContext.createMediaStreamSource(stream);
