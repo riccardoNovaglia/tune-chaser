@@ -1,0 +1,11 @@
+{
+  "name": "tune-chaser",
+  "version": "1.0.0",
+  "description": "A web page that helps you learn the guitar by comparing microphone input to a played note.",
+  "scripts": {
+    "format": "prettier --write src"
+  },
+  "devDependencies": {
+    "prettier": "3.5.2"
+  }
+}
