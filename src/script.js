@@ -1,9 +1,8 @@
 import { getMicrophoneId } from './microphone.js';
+import { getLastPlayedNoteFrequency } from './playNote.js';
 
 document.getElementById('start-note-button').addEventListener('click', playNote);
 document.getElementById('start-analyze-button').addEventListener('click', startAnalyzingInput);
-
-let targetFrequency = 440; // A4 note frequency
 
 function playNote() {
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -30,6 +29,7 @@ function startAnalyzingInput() {
     resultDisplay.textContent = '';
 
     const selectedMicrophoneId = getMicrophoneId();
+    const targetFrequency = getLastPlayedNoteFrequency();
     const constraints = { audio: { deviceId: selectedMicrophoneId ? { exact: selectedMicrophoneId } : undefined } };
     navigator.mediaDevices.getUserMedia(constraints)
         .then(stream => {
@@ -41,7 +41,7 @@ function startAnalyzingInput() {
             const bufferLength = analyser.fftSize;
             const dataArray = new Uint8Array(bufferLength);
 
-            analyzeInput(analyser, dataArray, audioContext, analyzeButton, resultDisplay);
+            analyzeInput(analyser, dataArray, audioContext, analyzeButton, resultDisplay, targetFrequency);
         })
         .catch(err => {
             console.error('Error accessing the microphone', err);
@@ -50,7 +50,7 @@ function startAnalyzingInput() {
         });
 }
 
-function analyzeInput(analyser, dataArray, audioContext, analyzeButton, resultDisplay) {
+function analyzeInput(analyser, dataArray, audioContext, analyzeButton, resultDisplay, targetFrequency) {
     const startTime = audioContext.currentTime;
     let detectedCorrectNote = false;
 
