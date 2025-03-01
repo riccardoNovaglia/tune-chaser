@@ -1,30 +1,9 @@
+import { getMicrophoneId } from './microphone.js';
+
 document.getElementById('start-note-button').addEventListener('click', playNote);
 document.getElementById('start-analyze-button').addEventListener('click', startAnalyzingInput);
-document.getElementById('microphone-select').addEventListener('change', updateSelectedMicrophone);
 
-let selectedMicrophoneId = localStorage.getItem('selectedMicrophoneId');
 let targetFrequency = 440; // A4 note frequency
-
-navigator.mediaDevices.enumerateDevices().then(devices => {
-    const micSelect = document.getElementById('microphone-select');
-    devices.forEach(device => {
-        if (device.kind === 'audioinput') {
-            const option = document.createElement('option');
-            option.value = device.deviceId;
-            option.text = device.label || `Microphone ${micSelect.length + 1}`;
-            micSelect.appendChild(option);
-        }
-    });
-
-    if (selectedMicrophoneId) {
-        micSelect.value = selectedMicrophoneId;
-    }
-});
-
-function updateSelectedMicrophone(event) {
-    selectedMicrophoneId = event.target.value;
-    localStorage.setItem('selectedMicrophoneId', selectedMicrophoneId);
-}
 
 function playNote() {
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -50,6 +29,7 @@ function startAnalyzingInput() {
     analyzeButton.disabled = true;
     resultDisplay.textContent = '';
 
+    const selectedMicrophoneId = getMicrophoneId();
     const constraints = { audio: { deviceId: selectedMicrophoneId ? { exact: selectedMicrophoneId } : undefined } };
     navigator.mediaDevices.getUserMedia(constraints)
         .then(stream => {
