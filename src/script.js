@@ -3,6 +3,7 @@ document.getElementById('start-analyze-button').addEventListener('click', startA
 document.getElementById('microphone-select').addEventListener('change', updateSelectedMicrophone);
 
 let selectedMicrophoneId = null;
+let targetFrequency = 440; // A4 note frequency
 
 navigator.mediaDevices.enumerateDevices().then(devices => {
     const micSelect = document.getElementById('microphone-select');
@@ -38,6 +39,12 @@ function playNote() {
 }
 
 function startAnalyzingInput() {
+    const analyzeButton = document.getElementById('start-analyze-button');
+    const resultDisplay = document.getElementById('result-display');
+    analyzeButton.textContent = 'Analyzing...';
+    analyzeButton.disabled = true;
+    resultDisplay.textContent = '';
+
     const constraints = { audio: { deviceId: selectedMicrophoneId ? { exact: selectedMicrophoneId } : undefined } };
     navigator.mediaDevices.getUserMedia(constraints)
         .then(stream => {
@@ -49,19 +56,55 @@ function startAnalyzingInput() {
             const bufferLength = analyser.fftSize;
             const dataArray = new Uint8Array(bufferLength);
 
-            analyzeInput(analyser, dataArray);
+            analyzeInput(analyser, dataArray, audioContext, analyzeButton, resultDisplay);
         })
         .catch(err => {
             console.error('Error accessing the microphone', err);
+            analyzeButton.textContent = 'Start Analyzing';
+            analyzeButton.disabled = false;
         });
 }
 
-function analyzeInput(analyser, dataArray) {
+function analyzeInput(analyser, dataArray, audioContext, analyzeButton, resultDisplay) {
+    const startTime = audioContext.currentTime;
+    let detectedCorrectNote = false;
+
     function analyze() {
         analyser.getByteTimeDomainData(dataArray);
-        // ...code to analyze the input and compare it to the played note...
-        requestAnimationFrame(analyze);
+        const frequency = getFrequencyFromData(dataArray, audioContext.sampleRate);
+
+        if (Math.abs(frequency - targetFrequency) < 5) { // Allow a small margin of error
+            detectedCorrectNote = true;
+        }
+
+        if (audioContext.currentTime - startTime < 5) {
+            requestAnimationFrame(analyze);
+        } else {
+            if (detectedCorrectNote) {
+                resultDisplay.textContent = 'Success! Correct note detected.';
+            } else {
+                resultDisplay.textContent = 'Incorrect note. Try again.';
+            }
+            analyzeButton.textContent = 'Start Analyzing';
+            analyzeButton.disabled = false;
+        }
     }
 
     analyze();
+}
+
+function getFrequencyFromData(dataArray, sampleRate) {
+    // Implement a basic algorithm to estimate the frequency from the time domain data
+    let maxIndex = 0;
+    let maxValue = -Infinity;
+
+    for (let i = 0; i < dataArray.length; i++) {
+        if (dataArray[i] > maxValue) {
+            maxValue = dataArray[i];
+            maxIndex = i;
+        }
+    }
+
+    const frequency = maxIndex * sampleRate / dataArray.length;
+    return frequency;
 }
