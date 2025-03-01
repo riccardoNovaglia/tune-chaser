@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "description": "A web page that helps you learn the guitar by comparing microphone input to a played note.",
   "scripts": {
-    "format": "prettier --write src"
+    "format": "prettier --write src",
+    "start": "live-server src"
   },
   "devDependencies": {
+    "live-server": "1.2.2",
     "prettier": "3.5.2"
   }
 }
