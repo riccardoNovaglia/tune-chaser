@@ -1,6 +1,24 @@
-document.getElementById('start-button').addEventListener('click', startTuneChaser);
+document.getElementById('start-note-button').addEventListener('click', playNote);
+document.getElementById('start-analyze-button').addEventListener('click', startAnalyzingInput);
 
-function startTuneChaser() {
+function playNote() {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    // Play a note (for simplicity, we'll use a fixed frequency)
+    const oscillator = audioContext.createOscillator();
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // A4 note
+    oscillator.connect(audioContext.destination);
+    oscillator.start();
+    document.getElementById('note-display').textContent = 'Playing A4 (440 Hz)';
+
+    // Stop the oscillator after 1 second
+    setTimeout(() => {
+        oscillator.stop();
+        document.getElementById('note-display').textContent = 'Note stopped';
+    }, 1000);
+}
+
+function startAnalyzingInput() {
     // Request access to the microphone
     navigator.mediaDevices.getUserMedia({ audio: true })
         .then(stream => {
@@ -12,30 +30,19 @@ function startTuneChaser() {
             const bufferLength = analyser.fftSize;
             const dataArray = new Uint8Array(bufferLength);
 
-            // Play a note (for simplicity, we'll use a fixed frequency)
-            const oscillator = audioContext.createOscillator();
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // A4 note
-            oscillator.connect(audioContext.destination);
-            oscillator.start();
-            document.getElementById('note-display').textContent = 'Playing A4 (440 Hz)';
-
-            // Stop the oscillator after a second
-            setTimeout(() => {
-                oscillator.stop();
-                document.getElementById('note-display').textContent = 'Note stopped';
-            }, 1000);
-
-            // Listen to the microphone input and compare it to the played note
-            function analyzeInput() {
-                analyser.getByteTimeDomainData(dataArray);
-                // ...code to analyze the input and compare it to the played note...
-                requestAnimationFrame(analyzeInput);
-            }
-
-            analyzeInput();
+            analyzeInput(analyser, dataArray);
         })
         .catch(err => {
             console.error('Error accessing the microphone', err);
         });
+}
+
+function analyzeInput(analyser, dataArray) {
+    function analyze() {
+        analyser.getByteTimeDomainData(dataArray);
+        // ...code to analyze the input and compare it to the played note...
+        requestAnimationFrame(analyze);
+    }
+
+    analyze();
 }
