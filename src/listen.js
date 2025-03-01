@@ -28,9 +28,13 @@ function playNote() {
 function startAnalyzingInput() {
   const analyzeButton = document.getElementById("start-analyze-button");
   const resultDisplay = document.getElementById("result-display");
+  const currentFrequencyDisplay = document.getElementById(
+    "current-frequency-display",
+  );
   analyzeButton.textContent = "Analyzing...";
   analyzeButton.disabled = true;
   resultDisplay.textContent = "";
+  currentFrequencyDisplay.textContent = "Current frequency: -- Hz";
 
   const selectedMicrophoneId = getMicrophoneId();
   const targetFrequency = getLastPlayedNoteFrequency();
@@ -59,6 +63,7 @@ function startAnalyzingInput() {
         audioContext,
         analyzeButton,
         resultDisplay,
+        currentFrequencyDisplay,
         targetFrequency,
       );
     })
@@ -75,6 +80,7 @@ function analyzeInput(
   audioContext,
   analyzeButton,
   resultDisplay,
+  currentFrequencyDisplay,
   targetFrequency,
 ) {
   const startTime = audioContext.currentTime;
@@ -83,6 +89,8 @@ function analyzeInput(
   function analyze() {
     analyser.getByteTimeDomainData(dataArray);
     const frequency = getFrequencyFromData(dataArray, audioContext.sampleRate);
+
+    currentFrequencyDisplay.textContent = `Current frequency: ${frequency.toFixed(2)} Hz`;
 
     if (Math.abs(frequency - targetFrequency) < 5) {
       // Allow a small margin of error

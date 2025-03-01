@@ -19,6 +19,12 @@ button {
   margin-top: 10px;
 }
 
+#current-frequency-display {
+  font-size: 20px;
+  margin-top: 10px;
+  color: #007bff;
+}
+
 #microphone-select {
   margin-top: 20px;
   padding: 10px;
