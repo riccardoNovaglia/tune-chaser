@@ -28,3 +28,17 @@ button {
 #controls {
   margin-top: 20px;
 }
+
+label {
+  font-size: 16px;
+  margin-right: 10px;
+}
+
+#microphone-selection {
+  margin-bottom: 30px;
+}
+
+hr {
+  margin: 30px 0;
+  border: 1px solid #ccc;
+}

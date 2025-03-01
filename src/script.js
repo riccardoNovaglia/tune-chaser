@@ -2,7 +2,7 @@ document.getElementById('start-note-button').addEventListener('click', playNote)
 document.getElementById('start-analyze-button').addEventListener('click', startAnalyzingInput);
 document.getElementById('microphone-select').addEventListener('change', updateSelectedMicrophone);
 
-let selectedMicrophoneId = null;
+let selectedMicrophoneId = localStorage.getItem('selectedMicrophoneId');
 let targetFrequency = 440; // A4 note frequency
 
 navigator.mediaDevices.enumerateDevices().then(devices => {
@@ -15,10 +15,15 @@ navigator.mediaDevices.enumerateDevices().then(devices => {
             micSelect.appendChild(option);
         }
     });
+
+    if (selectedMicrophoneId) {
+        micSelect.value = selectedMicrophoneId;
+    }
 });
 
 function updateSelectedMicrophone(event) {
     selectedMicrophoneId = event.target.value;
+    localStorage.setItem('selectedMicrophoneId', selectedMicrophoneId);
 }
 
 function playNote() {

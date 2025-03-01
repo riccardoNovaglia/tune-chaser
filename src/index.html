@@ -8,12 +8,16 @@
   </head>
   <body>
     <h1>Tune Chaser</h1>
-    <button id="start-note-button">Start Note</button>
-    <select id="microphone-select">
-      <option value="">Select Microphone</option>
-    </select>
-    <p id="note-display">Play a note...</p>
+    <div id="microphone-selection">
+      <label for="microphone-select">Select Microphone:</label>
+      <select id="microphone-select">
+        <option value="">Select Microphone</option>
+      </select>
+    </div>
+    <hr>
     <div id="controls">
+      <button id="start-note-button">Start Note</button>
+      <p id="note-display">Play a note...</p>
       <button id="start-analyze-button">Start Analyzing</button>
       <p id="result-display"></p>
     </div>
