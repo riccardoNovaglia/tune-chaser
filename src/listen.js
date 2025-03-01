@@ -2,28 +2,8 @@ import { getMicrophoneId } from "./microphone.js";
 import { getLastPlayedNoteFrequency } from "./playNote.js";
 
 document
-  .getElementById("start-note-button")
-  .addEventListener("click", playNote);
-document
   .getElementById("start-analyze-button")
   .addEventListener("click", startAnalyzingInput);
-
-function playNote() {
-  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  // Play a note (for simplicity, we'll use a fixed frequency)
-  const oscillator = audioContext.createOscillator();
-  oscillator.type = "sine";
-  oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // A4 note
-  oscillator.connect(audioContext.destination);
-  oscillator.start();
-  document.getElementById("note-display").textContent = "Playing A4 (440 Hz)";
-
-  // Stop the oscillator after 1 second
-  setTimeout(() => {
-    oscillator.stop();
-    document.getElementById("note-display").textContent = "Note stopped";
-  }, 1000);
-}
 
 function startAnalyzingInput() {
   const analyzeButton = document.getElementById("start-analyze-button");
@@ -52,14 +32,11 @@ function startAnalyzingInput() {
         window.webkitAudioContext)();
       const microphone = audioContext.createMediaStreamSource(stream);
       const analyser = audioContext.createAnalyser();
-      microphone.connect(analyser);
       analyser.fftSize = 2048;
-      const bufferLength = analyser.fftSize;
-      const dataArray = new Uint8Array(bufferLength);
+      microphone.connect(analyser);
 
       analyzeInput(
         analyser,
-        dataArray,
         audioContext,
         analyzeButton,
         resultDisplay,
@@ -76,7 +53,6 @@ function startAnalyzingInput() {
 
 function analyzeInput(
   analyser,
-  dataArray,
   audioContext,
   analyzeButton,
   resultDisplay,
@@ -85,19 +61,39 @@ function analyzeInput(
 ) {
   const startTime = audioContext.currentTime;
   let detectedCorrectNote = false;
+  let frequencySum = 0;
+  let frequencyCount = 0;
+  let lastUpdateTime = 0;
+
+  const bufferLength = analyser.fftSize;
+  const dataArray = new Uint8Array(bufferLength);
 
   function analyze() {
     analyser.getByteTimeDomainData(dataArray);
     const frequency = getFrequencyFromData(dataArray, audioContext.sampleRate);
 
-    currentFrequencyDisplay.textContent = `Current frequency: ${frequency.toFixed(2)} Hz`;
+    frequencySum += frequency;
+    frequencyCount++;
 
-    if (Math.abs(frequency - targetFrequency) < 5) {
-      // Allow a small margin of error
-      detectedCorrectNote = true;
+    const currentTime = audioContext.currentTime;
+    // Update every 200 milliseconds
+    if (currentTime - lastUpdateTime >= 0.2) {
+      if (frequencyCount > 0) {
+        const averageFrequency = frequencySum / frequencyCount;
+        currentFrequencyDisplay.textContent = `Current frequency: ${averageFrequency.toFixed(2)} Hz`;
+
+        if (Math.abs(averageFrequency - targetFrequency) < 5) {
+          // Allow a small margin of error
+          detectedCorrectNote = true;
+        }
+
+        frequencySum = 0;
+        frequencyCount = 0;
+      }
+      lastUpdateTime = currentTime;
     }
 
-    if (audioContext.currentTime - startTime < 5) {
+    if (currentTime - startTime < 5) {
       requestAnimationFrame(analyze);
     } else {
       if (detectedCorrectNote) {
