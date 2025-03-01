@@ -20,6 +20,12 @@ function startTuneChaser() {
             oscillator.start();
             document.getElementById('note-display').textContent = 'Playing A4 (440 Hz)';
 
+            // Stop the oscillator after a second
+            setTimeout(() => {
+                oscillator.stop();
+                document.getElementById('note-display').textContent = 'Note stopped';
+            }, 1000);
+
             // Listen to the microphone input and compare it to the played note
             function analyzeInput() {
                 analyser.getByteTimeDomainData(dataArray);
