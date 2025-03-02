@@ -1,4 +1,4 @@
-import { getMicrophoneId } from "./microphone.js";
+import { getMicrophoneId, showMicrophoneSelectionError } from "./microphone.js";
 import { analyzeInput } from "./analyzeInput.js";
 import { sessionManager, SessionState } from "./sessionManager.js";
 import {
@@ -18,6 +18,8 @@ const currentFrequencyDisplay = document.getElementById(
   "current-frequency-display",
 );
 const scoreDisplay = document.getElementById("score-display");
+const errorDisplay = document.getElementById("error-display");
+const settingsModal = document.getElementById("settings-modal");
 
 // Event listeners
 startSessionButton.addEventListener("click", startSession);
@@ -35,12 +37,17 @@ sessionManager.onScoreChange = (score) =>
 let analysisIntervalId = null;
 
 function startSession() {
+  const selectedMicrophoneId = getMicrophoneId();
+
+  if (!selectedMicrophoneId) {
+    showMicrophoneSelectionError();
+    return;
+  }
+
   startSessionButton.disabled = true;
   stopSessionButton.disabled = false;
   resultDisplay.textContent = "";
   resetCurrentFrequencyDisplay();
-
-  const selectedMicrophoneId = getMicrophoneId();
 
   sessionManager.startSession(selectedMicrophoneId);
 }

@@ -3,6 +3,7 @@ const settingsButton = document.getElementById("settings-button");
 const settingsModal = document.getElementById("settings-modal");
 const closeButton = document.querySelector(".close-button");
 const saveButton = document.getElementById("save-settings");
+const errorDisplay = document.getElementById("error-display");
 
 // Microphone selection
 const microphoneSelect = document.getElementById("microphone-select");
@@ -41,6 +42,7 @@ async function initializeMicrophones() {
 
 // Modal event listeners
 settingsButton.addEventListener("click", () => {
+  errorDisplay.textContent = ""; // Clear any previous error message
   initializeMicrophones(); // Refresh microphone list when opening settings
   settingsModal.style.display = "block";
 });
@@ -70,7 +72,15 @@ function getMicrophoneId() {
   return localStorage.getItem(SELECTED_MICROPHONE_KEY);
 }
 
+function showMicrophoneSelectionError() {
+  if (errorDisplay) {
+    errorDisplay.textContent =
+      "Please select a microphone before starting the session.";
+  }
+  settingsModal.style.display = "block";
+}
+
 // Initialize on page load
 document.addEventListener("DOMContentLoaded", initializeMicrophones);
 
-export { getMicrophoneId };
+export { getMicrophoneId, showMicrophoneSelectionError };
