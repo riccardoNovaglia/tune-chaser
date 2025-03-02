@@ -7,14 +7,32 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <h1>Tune Chaser</h1>
-    <div id="microphone-selection">
-      <label for="microphone-select">Select Microphone:</label>
-      <select id="microphone-select">
-        <option value="">Select Microphone</option>
-      </select>
+    <header>
+      <h1>Tune Chaser</h1>
+      <button id="settings-button" class="icon-button" title="Settings">⚙️</button>
+    </header>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Settings</h2>
+          <span class="close-button">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div id="microphone-selection">
+            <label for="microphone-select">Select Microphone:</label>
+            <select id="microphone-select">
+              <option value="">Select Microphone</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="save-settings">Save</button>
+        </div>
+      </div>
     </div>
-    <hr />
+
     <div id="controls">
       <div id="session-controls">
         <button id="start-session-button">Start Session</button>

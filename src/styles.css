@@ -1,7 +1,37 @@
 body {
   font-family: Arial, sans-serif;
   text-align: center;
-  margin-top: 50px;
+  margin: 0;
+  padding: 0;
+  background-color: #f9f9f9;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: #4CAF50;
+  color: white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+header h1 {
+  margin: 0;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+}
+
+.icon-button:hover {
+  background-color: rgba(255,255,255,0.2);
 }
 
 button {
@@ -26,27 +56,105 @@ button {
 }
 
 #microphone-select {
-  margin-top: 20px;
   padding: 10px;
   font-size: 16px;
+  width: 100%;
+  margin-top: 10px;
 }
 
 #controls {
-  margin-top: 20px;
+  margin: 30px auto;
+  max-width: 800px;
+  padding: 0 20px;
 }
 
 label {
   font-size: 16px;
-  margin-right: 10px;
+  display: block;
+  margin-bottom: 10px;
+  font-weight: bold;
 }
 
 #microphone-selection {
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
-hr {
-  margin: 30px 0;
-  border: 1px solid #ccc;
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+  background-color: white;
+  margin: 10% auto;
+  padding: 0;
+  width: 80%;
+  max-width: 500px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  animation: modalopen 0.3s;
+}
+
+@keyframes modalopen {
+  from {opacity: 0; transform: translateY(-20px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
+.modal-header {
+  padding: 15px 20px;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 8px 8px 0 0;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.modal-footer {
+  padding: 15px 20px;
+  background-color: #f5f5f5;
+  border-top: 1px solid #ddd;
+  text-align: right;
+  border-radius: 0 0 8px 8px;
+}
+
+.close-button {
+  color: #aaa;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close-button:hover {
+  color: #333;
+}
+
+#save-settings {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#save-settings:hover {
+  background-color: #45a049;
 }
 /* Session controls */
 #session-controls {
