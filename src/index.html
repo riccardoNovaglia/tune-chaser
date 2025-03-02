@@ -16,14 +16,20 @@
     </div>
     <hr />
     <div id="controls">
-      <button id="start-note-button">Start Note</button>
-      <p id="note-display">Play a note...</p>
-      <button id="start-analyze-button">Start Analyzing</button>
-      <p id="result-display"></p>
-      <p id="current-frequency-display">Current frequency: -- Hz</p>
+      <div id="session-controls">
+        <button id="start-session-button">Start Session</button>
+        <button id="stop-session-button" disabled>Stop Session</button>
+        <p id="score-display">Score: 0</p>
+      </div>
+      <div id="note-info">
+        <p id="note-display">Ready to start...</p>
+        <p id="state-display">Idle</p>
+        <p id="result-display"></p>
+        <p id="current-frequency-display">Current frequency: -- Hz</p>
+      </div>
     </div>
     <script type="module" src="microphone.js"></script>
-    <script type="module" src="playNote.js"></script>
+    <script type="module" src="sessionManager.js"></script>
     <script type="module" src="listen.js"></script>
   </body>
 </html>

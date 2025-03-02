@@ -11,6 +11,7 @@ function analyzeInput({
   onNoFrequencyDetected,
   onMatchProgress,
   onAnalysisComplete,
+  continuousMode = false,
 }) {
   const startTime = audioContext.currentTime;
   let detectedCorrectNote = false;
@@ -22,6 +23,7 @@ function analyzeInput({
   const bufferLength = analyser.frequencyBinCount;
   const dataArray = new Uint8Array(bufferLength);
 
+  // For continuous mode, we'll just do one analysis cycle
   function analyze() {
     analyser.getByteFrequencyData(dataArray);
 
@@ -59,7 +61,9 @@ function analyzeInput({
         if (matchResult.isMatch) {
           onMatchDetected(matchResult);
           detectedCorrectNote = true;
-          return;
+          
+          // In continuous mode, we just return after a match
+          if (continuousMode) return;
         } else {
           onMatchProgress(matchResult);
         }
@@ -68,15 +72,29 @@ function analyzeInput({
       onNoFrequencyDetected(amplitudeData.averageAmplitude);
     }
 
+    // For continuous mode, we don't need to check time or call requestAnimationFrame
+    if (continuousMode) {
+      return;
+    }
+
     // Continue analysis or finish if time is up
     const currentTime = audioContext.currentTime;
     if (currentTime - startTime < 10) {
       requestAnimationFrame(analyze);
     } else {
-      onAnalysisComplete(detectedCorrectNote);
+      if (onAnalysisComplete) {
+        onAnalysisComplete(detectedCorrectNote);
+      }
     }
   }
 
+  // In continuous mode, just run once and return
+  if (continuousMode) {
+    analyze();
+    return;
+  }
+
+  // In normal mode, start the animation frame loop
   requestAnimationFrame(analyze);
 }
 

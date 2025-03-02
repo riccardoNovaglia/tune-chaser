@@ -1,45 +1,108 @@
 import { getMicrophoneId } from "./microphone.js";
-import { getLastPlayedNoteFrequency } from "./playNote.js";
 import { analyzeInput } from "./analyzeInput.js";
+import { sessionManager, SessionState } from "./sessionManager.js";
 
-document
-  .getElementById("start-analyze-button")
-  .addEventListener("click", startAnalyzingInput);
+// UI Elements
+const startSessionButton = document.getElementById("start-session-button");
+const stopSessionButton = document.getElementById("stop-session-button");
+const noteDisplay = document.getElementById("note-display");
+const stateDisplay = document.getElementById("state-display");
+const resultDisplay = document.getElementById("result-display");
+const currentFrequencyDisplay = document.getElementById(
+  "current-frequency-display",
+);
+const scoreDisplay = document.getElementById("score-display");
 
-function startAnalyzingInput() {
-  const analyzeButton = document.getElementById("start-analyze-button");
-  const resultDisplay = document.getElementById("result-display");
-  const currentFrequencyDisplay = document.getElementById(
-    "current-frequency-display",
-  );
+// Event listeners
+startSessionButton.addEventListener("click", startSession);
+stopSessionButton.addEventListener("click", stopSession);
 
-  analyzeButton.textContent = "Analyzing...";
-  analyzeButton.disabled = true;
+// Set up session manager callbacks
+sessionManager.onStateChange = updateStateDisplay;
+sessionManager.onNoteChange = updateNoteDisplay;
+sessionManager.onScoreChange = updateScoreDisplay;
+
+// Analysis interval ID
+let analysisIntervalId = null;
+
+function startSession() {
+  // Update UI
+  startSessionButton.disabled = true;
+  stopSessionButton.disabled = false;
   resultDisplay.textContent = "";
   currentFrequencyDisplay.textContent = "Current frequency: -- Hz";
 
   const selectedMicrophoneId = getMicrophoneId();
-  const targetFrequency = getLastPlayedNoteFrequency();
 
-  const constraints = {
-    audio: {
-      deviceId: selectedMicrophoneId
-        ? { exact: selectedMicrophoneId }
-        : undefined,
-      noiseSuppression: false,
-      echoCancellation: false,
-      autoGainControl: true, // TODO: this might be better as false, check
-    },
-  };
+  // Start the session
+  sessionManager.startSession(selectedMicrophoneId);
+}
 
+function stopSession() {
+  // Update UI
+  startSessionButton.disabled = false;
+  stopSessionButton.disabled = true;
+
+  // Stop the session
+  sessionManager.stopSession();
+
+  // Clear any ongoing analysis
+  if (analysisIntervalId) {
+    clearInterval(analysisIntervalId);
+    analysisIntervalId = null;
+  }
+}
+
+function updateStateDisplay(state) {
+  stateDisplay.textContent = `State: ${state}`;
+
+  // If we're in listening state, start the analysis
+  if (state === SessionState.LISTENING) {
+    startAnalysis();
+  } else if (analysisIntervalId) {
+    // Stop analysis if we're not in listening state
+    clearInterval(analysisIntervalId);
+    analysisIntervalId = null;
+  }
+}
+
+function updateNoteDisplay(noteName, frequency) {
+  noteDisplay.textContent = `Target Note: ${noteName} (${frequency.toFixed(2)} Hz)`;
+}
+
+function updateScoreDisplay(score) {
+  scoreDisplay.textContent = `Score: ${score}`;
+}
+
+function startAnalysis() {
+  if (
+    !sessionManager.isSessionActive() ||
+    sessionManager.getCurrentState() !== SessionState.LISTENING
+  ) {
+    return;
+  }
+
+  const analyser = sessionManager.getAnalyser();
+  const audioContext = sessionManager.getAudioContext();
+  const targetFrequency = sessionManager.getCurrentNote();
+
+  if (!analyser || !audioContext || !targetFrequency) {
+    console.error("Missing required components for analysis", {
+      analyser,
+      audioContext,
+      targetFrequency,
+    });
+    return;
+  }
+
+  // Define callbacks for the analyzer
   const onMatchDetected = () => {
     resultDisplay.textContent = "Success! Correct note detected.";
-    analyzeButton.textContent = "Start Analyzing";
-    analyzeButton.disabled = false;
+    sessionManager.handleNoteMatch();
   };
 
   const onFrequencyUpdate = (frequency, amplitude) => {
-    currentFrequencyDisplay.textContent = `Current frequency: ${frequency.toFixed(2)} Hz (Strength: ${amplitude})`;
+    currentFrequencyDisplay.textContent = `Current frequency: ${frequency.toFixed(2)} Hz (Strength: ${amplitude.toFixed(1)})`;
   };
 
   const onNoFrequencyDetected = (amplitude) => {
@@ -50,25 +113,12 @@ function startAnalyzingInput() {
     resultDisplay.textContent = `Off by ${Math.abs(matchResult.centsOff).toFixed(1)} cents (${matchResult.direction})`;
   };
 
-  const onAnalysisComplete = (success) => {
-    if (success) {
-      resultDisplay.textContent = "Success! Correct note detected.";
-    } else {
-      resultDisplay.textContent = "Time's up. Try again.";
-    }
-    analyzeButton.textContent = "Start Analyzing";
-    analyzeButton.disabled = false;
-  };
+  // We don't need the onAnalysisComplete callback for continuous mode
+  const onAnalysisComplete = null;
 
-  navigator.mediaDevices
-    .getUserMedia(constraints)
-    .then((stream) => {
-      const audioContext = new (window.AudioContext ||
-        window.webkitAudioContext)();
-      const microphone = audioContext.createMediaStreamSource(stream);
-      const analyser = audioContext.createAnalyser();
-      microphone.connect(analyser);
-
+  // Start continuous analysis
+  analysisIntervalId = setInterval(() => {
+    if (sessionManager.getCurrentState() === SessionState.LISTENING) {
       analyzeInput({
         analyser,
         audioContext,
@@ -78,11 +128,11 @@ function startAnalyzingInput() {
         onNoFrequencyDetected,
         onMatchProgress,
         onAnalysisComplete,
+        continuousMode: true, // Add this flag to indicate continuous mode
       });
-    })
-    .catch((err) => {
-      console.error("Error accessing the microphone", err);
-      analyzeButton.textContent = "Start Analyzing";
-      analyzeButton.disabled = false;
-    });
+    } else {
+      clearInterval(analysisIntervalId);
+      analysisIntervalId = null;
+    }
+  }, 100); // Run analysis every 100ms
 }

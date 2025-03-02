@@ -48,3 +48,71 @@ hr {
   margin: 30px 0;
   border: 1px solid #ccc;
 }
+/* Session controls */
+#session-controls {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+#start-session-button, #stop-session-button {
+  padding: 10px 20px;
+  margin-right: 15px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 4px;
+  border: none;
+}
+
+#start-session-button {
+  background-color: #4CAF50;
+  color: white;
+}
+
+#stop-session-button {
+  background-color: #f44336;
+  color: white;
+}
+
+#start-session-button:disabled, #stop-session-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+#score-display {
+  font-size: 18px;
+  font-weight: bold;
+  margin-left: 20px;
+}
+
+/* Note information */
+#note-info {
+  background-color: #f5f5f5;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+#note-display {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+#state-display {
+  color: #666;
+  margin-bottom: 10px;
+}
+
+#result-display {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+#current-frequency-display {
+  font-family: monospace;
+  background-color: #eee;
+  padding: 5px;
+  border-radius: 3px;
+}
