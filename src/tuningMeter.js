@@ -43,3 +43,29 @@ export function resetTuningMeter() {
     centsDisplay.textContent = "0¢";
   }
 }
+
+/**
+ * Updates the current frequency display
+ * @param {number} frequency - The current frequency
+ * @param {number} amplitude - The amplitude of the frequency
+ */
+export function updateCurrentFrequencyDisplay(frequency, amplitude) {
+  const currentFrequencyDisplay = document.getElementById(
+    "current-frequency-display",
+  );
+  if (currentFrequencyDisplay) {
+    currentFrequencyDisplay.textContent = `Current frequency: ${frequency.toFixed(2)} Hz (Strength: ${amplitude.toFixed(1)})`;
+  }
+}
+
+/**
+ * Resets the current frequency display
+ */
+export function resetCurrentFrequencyDisplay() {
+  const currentFrequencyDisplay = document.getElementById(
+    "current-frequency-display",
+  );
+  if (currentFrequencyDisplay) {
+    currentFrequencyDisplay.textContent = "Current frequency: -- Hz";
+  }
+}

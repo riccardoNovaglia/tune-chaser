@@ -1,7 +1,12 @@
 import { getMicrophoneId } from "./microphone.js";
 import { analyzeInput } from "./analyzeInput.js";
 import { sessionManager, SessionState } from "./sessionManager.js";
-import { updateTuningMeter, resetTuningMeter } from "./tuningMeter.js";
+import {
+  updateTuningMeter,
+  resetTuningMeter,
+  updateCurrentFrequencyDisplay,
+  resetCurrentFrequencyDisplay,
+} from "./tuningMeter.js";
 
 // UI Elements
 const startSessionButton = document.getElementById("start-session-button");
@@ -33,7 +38,7 @@ function startSession() {
   startSessionButton.disabled = true;
   stopSessionButton.disabled = false;
   resultDisplay.textContent = "";
-  currentFrequencyDisplay.textContent = "Current frequency: -- Hz";
+  resetCurrentFrequencyDisplay();
 
   const selectedMicrophoneId = getMicrophoneId();
 
@@ -102,10 +107,10 @@ function startAnalysis() {
           sessionManager.handleNoteMatch();
         },
         onFrequencyUpdate: (frequency, amplitude) => {
-          currentFrequencyDisplay.textContent = `Current frequency: ${frequency.toFixed(2)} Hz (Strength: ${amplitude.toFixed(1)})`;
+          updateCurrentFrequencyDisplay(frequency, amplitude);
         },
         onNoFrequencyDetected: (amplitude) => {
-          currentFrequencyDisplay.textContent = `Current frequency: -- Hz (no sound detected, level: ${amplitude.toFixed(1)})`;
+          updateCurrentFrequencyDisplay(null, amplitude);
         },
         onMatchProgress: (matchResult) => {
           // Update the tuning meter
