@@ -130,7 +130,15 @@ function getMedianFrequency(recentFrequencies, newFrequency) {
   recentFrequencies.push(newFrequency);
 
   const sortedFrequencies = [...recentFrequencies].sort((a, b) => a - b);
-  return sortedFrequencies[Math.floor(sortedFrequencies.length / 2)];
+  const mid = Math.floor(sortedFrequencies.length / 2);
+
+  // If even number of elements, return average of middle two
+  if (sortedFrequencies.length % 2 === 0) {
+    return (sortedFrequencies[mid - 1] + sortedFrequencies[mid]) / 2;
+  }
+
+  // If odd number of elements, return middle element
+  return sortedFrequencies[mid];
 }
 
 // Check if detected note matches the target note
@@ -144,4 +152,11 @@ function checkNoteMatch(detectedFrequency, targetFrequency) {
   return { isMatch, centsOff, direction };
 }
 
-export { analyzeInput };
+export {
+  analyzeInput,
+  getFrequencyRange,
+  getAmplitudeData,
+  detectFrequency,
+  getMedianFrequency,
+  checkNoteMatch,
+};
