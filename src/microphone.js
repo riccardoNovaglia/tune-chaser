@@ -12,18 +12,19 @@ const SELECTED_MICROPHONE_KEY = "selectedMicrophoneId";
 async function initializeMicrophones() {
   try {
     const devices = await navigator.mediaDevices.enumerateDevices();
-    
+
     // Clear existing options except the first one
     while (microphoneSelect.options.length > 1) {
       microphoneSelect.remove(1);
     }
-    
+
     // Add microphone options
     devices.forEach((device) => {
       if (device.kind === "audioinput") {
         const option = document.createElement("option");
         option.value = device.deviceId;
-        option.text = device.label || `Microphone ${microphoneSelect.length + 1}`;
+        option.text =
+          device.label || `Microphone ${microphoneSelect.length + 1}`;
         microphoneSelect.appendChild(option);
       }
     });

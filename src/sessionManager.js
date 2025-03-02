@@ -98,7 +98,7 @@ class SessionManager {
       this.currentNoteName,
       this.audioContext,
       CONFIG.notePlayDuration,
-      () => this.startListening() // Callback when note finishes
+      () => this.startListening(), // Callback when note finishes
     );
   }
 
