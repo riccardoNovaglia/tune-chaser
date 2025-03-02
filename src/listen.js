@@ -75,13 +75,6 @@ function updateState(state) {
 }
 
 function startAnalysis() {
-  if (
-    !sessionManager.isSessionActive() ||
-    sessionManager.getCurrentState() !== SessionState.LISTENING
-  ) {
-    return;
-  }
-
   const analyser = sessionManager.getAnalyser();
   const audioContext = sessionManager.getAudioContext();
   const targetFrequency = sessionManager.getCurrentNote();
@@ -97,32 +90,27 @@ function startAnalysis() {
 
   // Start continuous analysis
   analysisIntervalId = setInterval(() => {
-    if (sessionManager.getCurrentState() === SessionState.LISTENING) {
-      analyzeInput({
-        analyser,
-        audioContext,
-        targetFrequency,
-        onMatchDetected: () => {
-          resultDisplay.textContent = "Success! Correct note detected.";
-          sessionManager.handleNoteMatch();
-        },
-        onFrequencyUpdate: (frequency, amplitude) => {
-          updateCurrentFrequencyDisplay(frequency, amplitude);
-        },
-        onNoFrequencyDetected: (amplitude) => {
-          updateCurrentFrequencyDisplay(null, amplitude);
-        },
-        onMatchProgress: (matchResult) => {
-          // Update the tuning meter
-          updateTuningMeter(matchResult.centsOff);
+    analyzeInput({
+      analyser,
+      audioContext,
+      targetFrequency,
+      onMatchDetected: () => {
+        resultDisplay.textContent = "Success! Correct note detected.";
+        sessionManager.handleNoteMatch();
+      },
+      onFrequencyUpdate: (frequency, amplitude) => {
+        updateCurrentFrequencyDisplay(frequency, amplitude);
+      },
+      onNoFrequencyDetected: (amplitude) => {
+        updateCurrentFrequencyDisplay(null, amplitude);
+      },
+      onMatchProgress: (matchResult) => {
+        // Update the tuning meter
+        updateTuningMeter(matchResult.centsOff);
 
-          // Still show text result
-          resultDisplay.textContent = `${matchResult.direction}`;
-        },
-      });
-    } else {
-      clearInterval(analysisIntervalId);
-      analysisIntervalId = null;
-    }
+        // Still show text result
+        resultDisplay.textContent = `${matchResult.direction}`;
+      },
+    });
   }, 100);
 }
