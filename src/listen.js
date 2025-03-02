@@ -14,12 +14,7 @@ const stopSessionButton = document.getElementById("stop-session-button");
 const noteDisplay = document.getElementById("note-display");
 const stateDisplay = document.getElementById("state-display");
 const resultDisplay = document.getElementById("result-display");
-const currentFrequencyDisplay = document.getElementById(
-  "current-frequency-display",
-);
 const scoreDisplay = document.getElementById("score-display");
-const errorDisplay = document.getElementById("error-display");
-const settingsModal = document.getElementById("settings-modal");
 
 // Event listeners
 startSessionButton.addEventListener("click", startSession);
