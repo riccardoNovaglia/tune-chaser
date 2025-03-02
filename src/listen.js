@@ -113,9 +113,6 @@ function startAnalysis() {
     resultDisplay.textContent = `Off by ${Math.abs(matchResult.centsOff).toFixed(1)} cents (${matchResult.direction})`;
   };
 
-  // We don't need the onAnalysisComplete callback for continuous mode
-  const onAnalysisComplete = null;
-
   // Start continuous analysis
   analysisIntervalId = setInterval(() => {
     if (sessionManager.getCurrentState() === SessionState.LISTENING) {
@@ -126,9 +123,7 @@ function startAnalysis() {
         onMatchDetected,
         onFrequencyUpdate,
         onNoFrequencyDetected,
-        onMatchProgress,
-        onAnalysisComplete,
-        continuousMode: true, // Add this flag to indicate continuous mode
+        onMatchProgress
       });
     } else {
       clearInterval(analysisIntervalId);

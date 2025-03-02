@@ -10,12 +10,7 @@ function analyzeInput({
   onFrequencyUpdate,
   onNoFrequencyDetected,
   onMatchProgress,
-  onAnalysisComplete,
-  continuousMode = false,
 }) {
-  const startTime = audioContext.currentTime;
-  let detectedCorrectNote = false;
-
   analyser.fftSize = 4096; // Higher resolution for better accuracy
   analyser.smoothingTimeConstant = 0.2; // Less smoothing for responsive detection
 
@@ -23,79 +18,49 @@ function analyzeInput({
   const bufferLength = analyser.frequencyBinCount;
   const dataArray = new Uint8Array(bufferLength);
 
-  // For continuous mode, we'll just do one analysis cycle
-  function analyze() {
-    analyser.getByteFrequencyData(dataArray);
+  // Get frequency data
+  analyser.getByteFrequencyData(dataArray);
 
-    // Get frequency range for analysis
-    const frequencyRange = getFrequencyRange(
+  // Get frequency range for analysis
+  const frequencyRange = getFrequencyRange(
+    analyser.fftSize,
+    audioContext.sampleRate,
+  );
+
+  // Calculate amplitude in relevant range
+  const amplitudeData = getAmplitudeData(dataArray, frequencyRange);
+
+  // Minimum threshold for sound detection
+  if (amplitudeData.averageAmplitude > 5) {
+    // Detect the dominant frequency
+    const frequencyData = detectFrequency(
+      dataArray,
+      frequencyRange,
+      amplitudeData,
       analyser.fftSize,
       audioContext.sampleRate,
     );
 
-    // Calculate amplitude in relevant range
-    const amplitudeData = getAmplitudeData(dataArray, frequencyRange);
-
-    // Minimum threshold for sound detection
-    if (amplitudeData.averageAmplitude > 5) {
-      // Detect the dominant frequency
-      const frequencyData = detectFrequency(
-        dataArray,
-        frequencyRange,
-        amplitudeData,
-        analyser.fftSize,
-        audioContext.sampleRate,
+    if (frequencyData.isValid) {
+      const medianFrequency = getMedianFrequency(
+        recentFrequencies,
+        frequencyData.refinedFrequency,
       );
 
-      if (frequencyData.isValid) {
-        const medianFrequency = getMedianFrequency(
-          recentFrequencies,
-          frequencyData.refinedFrequency,
-        );
+      // Update UI with current frequency
+      onFrequencyUpdate(medianFrequency, amplitudeData.maxValue);
 
-        // Update UI with current frequency
-        onFrequencyUpdate(medianFrequency, amplitudeData.maxValue);
+      const matchResult = checkNoteMatch(medianFrequency, targetFrequency);
 
-        const matchResult = checkNoteMatch(medianFrequency, targetFrequency);
-
-        if (matchResult.isMatch) {
-          onMatchDetected(matchResult);
-          detectedCorrectNote = true;
-          
-          // In continuous mode, we just return after a match
-          if (continuousMode) return;
-        } else {
-          onMatchProgress(matchResult);
-        }
-      }
-    } else {
-      onNoFrequencyDetected(amplitudeData.averageAmplitude);
-    }
-
-    // For continuous mode, we don't need to check time or call requestAnimationFrame
-    if (continuousMode) {
-      return;
-    }
-
-    // Continue analysis or finish if time is up
-    const currentTime = audioContext.currentTime;
-    if (currentTime - startTime < 10) {
-      requestAnimationFrame(analyze);
-    } else {
-      if (onAnalysisComplete) {
-        onAnalysisComplete(detectedCorrectNote);
+      if (matchResult.isMatch) {
+        onMatchDetected(matchResult);
+      } else {
+        onMatchProgress(matchResult);
       }
     }
+  } else {
+    onNoFrequencyDetected(amplitudeData.averageAmplitude);
   }
-
-  // In continuous mode, just run once and return
-  if (continuousMode) {
-    analyze();
-    return;
-  }
-
-  // In normal mode, start the animation frame loop
-  requestAnimationFrame(analyze);
 }
 
 // Calculate the frequency range for musical notes
