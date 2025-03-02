@@ -2,6 +2,12 @@ const LAST_PLAYED_NOTE_KEY = "lastPlayedNoteFrequency";
 
 // Note frequencies (A4 = 440Hz and others)
 const NOTES = {
+  E2: 82.41,
+  A2: 110.0,
+  D3: 146.83,
+  G3: 196.0,
+  B3: 246.94,
+  E4: 329.63,
   C4: 261.63,
   D4: 293.66,
   E4: 329.63,
@@ -24,7 +30,13 @@ let activeOscillator = null;
  * @param {Function} onComplete - Callback when note finishes playing (optional)
  * @returns {AudioContext} - The audio context used
  */
-function playNote(frequency, noteName, existingAudioContext, duration = 1000, onComplete = null) {
+function playNote(
+  frequency,
+  noteName,
+  existingAudioContext,
+  duration = 1000,
+  onComplete = null,
+) {
   // Stop any currently playing note
   if (activeOscillator) {
     stopNote();
@@ -33,10 +45,13 @@ function playNote(frequency, noteName, existingAudioContext, duration = 1000, on
   const audioContext =
     existingAudioContext ||
     new (window.AudioContext || window.webkitAudioContext)();
-  
+
   activeOscillator = audioContext.createOscillator();
   activeOscillator.type = "sine";
-  activeOscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+  activeOscillator.frequency.setValueAtTime(
+    frequency,
+    audioContext.currentTime,
+  );
   activeOscillator.connect(audioContext.destination);
   activeOscillator.start();
 
@@ -76,7 +91,7 @@ function stopNote(noteDisplay = null) {
     }
     activeOscillator = null;
   }
-  
+
   if (noteDisplay) {
     noteDisplay.textContent = "Note stopped";
   }
