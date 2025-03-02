@@ -61,6 +61,52 @@ function updateState(state) {
     clearInterval(analysisIntervalId);
     analysisIntervalId = null;
   }
+  
+  // Reset tuning meter when not in listening state
+  if (state !== SessionState.LISTENING) {
+    resetTuningMeter();
+  }
+}
+
+// Function to update the tuning meter based on cents off
+function updateTuningMeter(centsOff) {
+  const needle = document.getElementById('tuning-needle');
+  const centsDisplay = document.getElementById('cents-display');
+  
+  // Clamp the cents value to a reasonable range for display (-50 to +50 cents)
+  const clampedCents = Math.max(-50, Math.min(50, centsOff));
+  
+  // Calculate position (50% is center, each 10 cents = 5% movement)
+  const position = 50 + (clampedCents * 0.5);
+  
+  // Update needle position
+  needle.style.left = `${position}%`;
+  
+  // Update cents display
+  centsDisplay.textContent = `${Math.abs(centsOff).toFixed(1)}¢`;
+  
+  // Change color based on how close to correct pitch
+  if (Math.abs(centsOff) < 5) {
+    needle.style.backgroundColor = '#00cc00'; // Very close - green
+  } else if (Math.abs(centsOff) < 15) {
+    needle.style.backgroundColor = '#66cc00'; // Close - yellow-green
+  } else if (Math.abs(centsOff) < 25) {
+    needle.style.backgroundColor = '#cccc00'; // Getting there - yellow
+  } else {
+    needle.style.backgroundColor = '#cc0000'; // Far off - red
+  }
+}
+
+// Reset the tuning meter to center position
+function resetTuningMeter() {
+  const needle = document.getElementById('tuning-needle');
+  const centsDisplay = document.getElementById('cents-display');
+  
+  if (needle && centsDisplay) {
+    needle.style.left = '50%';
+    needle.style.backgroundColor = '#333';
+    centsDisplay.textContent = '0¢';
+  }
 }
 
 function startAnalysis() {
@@ -102,7 +148,11 @@ function startAnalysis() {
           currentFrequencyDisplay.textContent = `Current frequency: -- Hz (no sound detected, level: ${amplitude.toFixed(1)})`;
         },
         onMatchProgress: (matchResult) => {
-          resultDisplay.textContent = `Off by ${Math.abs(matchResult.centsOff).toFixed(1)} cents (${matchResult.direction})`;
+          // Update the tuning meter
+          updateTuningMeter(matchResult.centsOff);
+          
+          // Still show text result
+          resultDisplay.textContent = `${matchResult.direction}`;
         },
       });
     } else {

@@ -224,3 +224,72 @@ label {
   padding: 5px;
   border-radius: 3px;
 }
+
+/* Tuning meter styles */
+#tuning-container {
+  margin: 20px auto;
+  max-width: 400px;
+}
+
+#tuning-meter {
+  position: relative;
+  height: 60px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+
+.tuning-scale {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to right, 
+    #ff4d4d 0%, 
+    #ff9966 20%, 
+    #ffff66 40%, 
+    #99ff99 50%, 
+    #ffff66 60%, 
+    #ff9966 80%, 
+    #ff4d4d 100%
+  );
+  opacity: 0.8;
+}
+
+#tuning-needle {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  height: 50px;
+  width: 4px;
+  background-color: #333;
+  transform: translateX(-50%);
+  transition: left 0.2s ease-out;
+  z-index: 2;
+}
+
+#tuning-center-mark {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 60px;
+  width: 2px;
+  background-color: rgba(0, 0, 0, 0.3);
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+#tuning-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #666;
+}
+
+#cents-display {
+  font-weight: bold;
+  font-size: 16px;
+  color: #333;
+}
