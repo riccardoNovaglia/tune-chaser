@@ -17,16 +17,18 @@ const scoreDisplay = document.getElementById("score-display");
 startSessionButton.addEventListener("click", startSession);
 stopSessionButton.addEventListener("click", stopSession);
 
-// Set up session manager callbacks
-sessionManager.onStateChange = updateStateDisplay;
-sessionManager.onNoteChange = updateNoteDisplay;
-sessionManager.onScoreChange = updateScoreDisplay;
+sessionManager.onStateChange = (state) => {
+  stateDisplay.textContent = `State: ${state}`;
+  updateState(state);
+};
+sessionManager.onNoteChange = (noteName, frequency) =>
+  (noteDisplay.textContent = `Target Note: ${noteName} (${frequency.toFixed(2)} Hz)`);
+sessionManager.onScoreChange = (score) =>
+  (scoreDisplay.textContent = `Score: ${score}`);
 
-// Analysis interval ID
 let analysisIntervalId = null;
 
 function startSession() {
-  // Update UI
   startSessionButton.disabled = true;
   stopSessionButton.disabled = false;
   resultDisplay.textContent = "";
@@ -34,16 +36,13 @@ function startSession() {
 
   const selectedMicrophoneId = getMicrophoneId();
 
-  // Start the session
   sessionManager.startSession(selectedMicrophoneId);
 }
 
 function stopSession() {
-  // Update UI
   startSessionButton.disabled = false;
   stopSessionButton.disabled = true;
 
-  // Stop the session
   sessionManager.stopSession();
 
   // Clear any ongoing analysis
@@ -53,9 +52,7 @@ function stopSession() {
   }
 }
 
-function updateStateDisplay(state) {
-  stateDisplay.textContent = `State: ${state}`;
-
+function updateState(state) {
   // If we're in listening state, start the analysis
   if (state === SessionState.LISTENING) {
     startAnalysis();
@@ -64,14 +61,6 @@ function updateStateDisplay(state) {
     clearInterval(analysisIntervalId);
     analysisIntervalId = null;
   }
-}
-
-function updateNoteDisplay(noteName, frequency) {
-  noteDisplay.textContent = `Target Note: ${noteName} (${frequency.toFixed(2)} Hz)`;
-}
-
-function updateScoreDisplay(score) {
-  scoreDisplay.textContent = `Score: ${score}`;
 }
 
 function startAnalysis() {
@@ -95,24 +84,6 @@ function startAnalysis() {
     return;
   }
 
-  // Define callbacks for the analyzer
-  const onMatchDetected = () => {
-    resultDisplay.textContent = "Success! Correct note detected.";
-    sessionManager.handleNoteMatch();
-  };
-
-  const onFrequencyUpdate = (frequency, amplitude) => {
-    currentFrequencyDisplay.textContent = `Current frequency: ${frequency.toFixed(2)} Hz (Strength: ${amplitude.toFixed(1)})`;
-  };
-
-  const onNoFrequencyDetected = (amplitude) => {
-    currentFrequencyDisplay.textContent = `Current frequency: -- Hz (no sound detected, level: ${amplitude.toFixed(1)})`;
-  };
-
-  const onMatchProgress = (matchResult) => {
-    resultDisplay.textContent = `Off by ${Math.abs(matchResult.centsOff).toFixed(1)} cents (${matchResult.direction})`;
-  };
-
   // Start continuous analysis
   analysisIntervalId = setInterval(() => {
     if (sessionManager.getCurrentState() === SessionState.LISTENING) {
@@ -120,14 +91,23 @@ function startAnalysis() {
         analyser,
         audioContext,
         targetFrequency,
-        onMatchDetected,
-        onFrequencyUpdate,
-        onNoFrequencyDetected,
-        onMatchProgress
+        onMatchDetected: () => {
+          resultDisplay.textContent = "Success! Correct note detected.";
+          sessionManager.handleNoteMatch();
+        },
+        onFrequencyUpdate: (frequency, amplitude) => {
+          currentFrequencyDisplay.textContent = `Current frequency: ${frequency.toFixed(2)} Hz (Strength: ${amplitude.toFixed(1)})`;
+        },
+        onNoFrequencyDetected: (amplitude) => {
+          currentFrequencyDisplay.textContent = `Current frequency: -- Hz (no sound detected, level: ${amplitude.toFixed(1)})`;
+        },
+        onMatchProgress: (matchResult) => {
+          resultDisplay.textContent = `Off by ${Math.abs(matchResult.centsOff).toFixed(1)} cents (${matchResult.direction})`;
+        },
       });
     } else {
       clearInterval(analysisIntervalId);
       analysisIntervalId = null;
     }
-  }, 100); // Run analysis every 100ms
+  }, 100);
 }
