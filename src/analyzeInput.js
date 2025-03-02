@@ -10,6 +10,7 @@ function analyzeInput({
   onFrequencyUpdate,
   onNoFrequencyDetected,
   onMatchProgress,
+  noiseGateThreshold,
 }) {
   analyser.fftSize = 4096; // Higher resolution for better accuracy
   analyser.smoothingTimeConstant = 0.2; // Less smoothing for responsive detection
@@ -31,7 +32,7 @@ function analyzeInput({
   const amplitudeData = getAmplitudeData(dataArray, frequencyRange);
 
   // Minimum threshold for sound detection
-  if (amplitudeData.averageAmplitude > 5) {
+  if (amplitudeData.averageAmplitude > noiseGateThreshold) {
     // Detect the dominant frequency
     const frequencyData = detectFrequency(
       dataArray,

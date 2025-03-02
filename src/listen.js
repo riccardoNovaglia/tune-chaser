@@ -35,6 +35,9 @@ sessionManager.onScoreChange = (score) =>
   (scoreDisplay.textContent = `Score: ${score}`);
 
 let analysisIntervalId = null;
+let noiseGateTimeoutId = null;
+const NOISE_GATE_THRESHOLD = 5; // Adjust as needed
+const NOISE_GATE_DELAY = 1000; // 1 second delay
 
 function startSession() {
   const selectedMicrophoneId = getMicrophoneId();
@@ -48,7 +51,7 @@ function startSession() {
   stopSessionButton.disabled = false;
   resultDisplay.textContent = "";
   resetCurrentFrequencyDisplay();
-
+  clearTimeout(noiseGateTimeoutId); // Clear any existing noise gate timeout
   sessionManager.startSession(selectedMicrophoneId);
 }
 
@@ -63,12 +66,13 @@ function stopSession() {
     clearInterval(analysisIntervalId);
     analysisIntervalId = null;
   }
+  clearTimeout(noiseGateTimeoutId); // Clear any existing noise gate timeout
 }
 
 function updateState(state) {
   // If we're in listening state, start the analysis
   if (state === SessionState.LISTENING) {
-    startAnalysis();
+    noiseGateTimeoutId = setTimeout(startAnalysis, NOISE_GATE_DELAY);
   } else if (analysisIntervalId) {
     // Stop analysis if we're not in listening state
     clearInterval(analysisIntervalId);
@@ -101,6 +105,7 @@ function startAnalysis() {
       analyser,
       audioContext,
       targetFrequency,
+      noiseGateThreshold: NOISE_GATE_THRESHOLD,
       onMatchDetected: () => {
         resultDisplay.textContent = "Success! Correct note detected.";
         sessionManager.handleNoteMatch();
