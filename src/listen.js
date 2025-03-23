@@ -9,16 +9,14 @@ import {
 } from "./tuningMeter.js";
 
 // UI Elements
-const startSessionButton = document.getElementById("start-session-button");
-const stopSessionButton = document.getElementById("stop-session-button");
+const sessionToggleButton = document.getElementById("session-toggle-button");
 const noteDisplay = document.getElementById("note-display");
 const stateDisplay = document.getElementById("state-display");
 const resultDisplay = document.getElementById("result-display");
 const scoreDisplay = document.getElementById("score-display");
 
 // Event listeners
-startSessionButton.addEventListener("click", startSession);
-stopSessionButton.addEventListener("click", stopSession);
+sessionToggleButton.addEventListener("click", toggleSession);
 
 sessionManager.onStateChange = (state) => {
   stateDisplay.textContent = `State: ${state}`;
@@ -34,6 +32,20 @@ let noiseGateTimeoutId = null;
 const NOISE_GATE_THRESHOLD = 5; // Adjust as needed
 const NOISE_GATE_DELAY = 1000; // 1 second delay
 
+function toggleSession() {
+  if (sessionManager.isSessionActive()) {
+    stopSession();
+    sessionToggleButton.textContent = "Start Session";
+    sessionToggleButton.classList.remove("active");
+    sessionToggleButton.classList.add("session-toggle");
+  } else {
+    startSession();
+    sessionToggleButton.textContent = "Stop Session";
+    sessionToggleButton.classList.remove("session-toggle");
+    sessionToggleButton.classList.add("active");
+  }
+}
+
 function startSession() {
   const selectedMicrophoneId = getMicrophoneId();
 
@@ -42,8 +54,6 @@ function startSession() {
     return;
   }
 
-  startSessionButton.disabled = true;
-  stopSessionButton.disabled = false;
   resultDisplay.textContent = "";
   resetCurrentFrequencyDisplay();
   clearTimeout(noiseGateTimeoutId); // Clear any existing noise gate timeout
@@ -51,9 +61,6 @@ function startSession() {
 }
 
 function stopSession() {
-  startSessionButton.disabled = false;
-  stopSessionButton.disabled = true;
-
   sessionManager.stopSession();
 
   // Clear any ongoing analysis
