@@ -2,3 +2,5 @@ node_modules/
 .aider*
 coverage/
 .vscode
+.aider
+.env
