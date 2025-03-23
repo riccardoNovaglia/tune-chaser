@@ -136,6 +136,13 @@ class SessionManager {
     // Don't increment score when skipping
     this.selectNextNote();
   }
+  
+  playCurrentNoteAgain() {
+    if (!this.sessionActive) return;
+    
+    // Play the current note again
+    this.playReferenceNote();
+  }
 
   async setupMicrophoneAndAnalysis() {
     try {

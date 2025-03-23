@@ -12,7 +12,7 @@
       .hidden {
         display: none;
       }
-      #skip-note-button {
+      #skip-note-button, #play-again-button {
         margin-left: 10px;
         background-color: #f0f0f0;
         color: #333;
@@ -21,8 +21,16 @@
         border-radius: 4px;
         cursor: pointer;
       }
-      #skip-note-button:hover {
+      #skip-note-button:hover, #play-again-button:hover {
         background-color: #e0e0e0;
+      }
+      #play-again-button {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        border-color: #a5d6a7;
+      }
+      #play-again-button:hover {
+        background-color: #c8e6c9;
       }
     </style>
   </head>
@@ -59,6 +67,7 @@
     <div id="controls">
       <div id="session-controls">
         <button id="session-toggle-button" class="session-toggle">Start Session</button>
+        <button id="play-again-button" class="hidden">Play Again</button>
         <button id="skip-note-button" class="hidden">Skip Note</button>
       </div>
       <div id="note-info">

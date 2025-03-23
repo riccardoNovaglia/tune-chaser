@@ -11,6 +11,7 @@ import {
 // UI Elements
 const sessionToggleButton = document.getElementById("session-toggle-button");
 const skipNoteButton = document.getElementById("skip-note-button");
+const playAgainButton = document.getElementById("play-again-button");
 const noteDisplay = document.getElementById("note-display");
 const instructionDisplay = document.getElementById("instruction-display");
 const resultDisplay = document.getElementById("result-display");
@@ -19,6 +20,7 @@ const scoreDisplay = document.getElementById("score-display");
 // Event listeners
 sessionToggleButton.addEventListener("click", toggleSession);
 skipNoteButton.addEventListener("click", skipCurrentNote);
+playAgainButton.addEventListener("click", playCurrentNoteAgain);
 
 sessionManager.onStateChange = (state) => {
   updateState(state);
@@ -44,12 +46,14 @@ function toggleSession() {
     sessionToggleButton.classList.remove("active");
     sessionToggleButton.classList.add("session-toggle");
     skipNoteButton.classList.add("hidden");
+    playAgainButton.classList.add("hidden");
   } else {
     startSession();
     sessionToggleButton.textContent = "Stop Session";
     sessionToggleButton.classList.remove("session-toggle");
     sessionToggleButton.classList.add("active");
     skipNoteButton.classList.remove("hidden");
+    playAgainButton.classList.remove("hidden");
   }
 }
 
@@ -97,8 +101,26 @@ function stopSession() {
   }
   clearTimeout(noiseGateTimeoutId); // Clear any existing noise gate timeout
   
-  // Hide the skip button
+  // Hide the buttons
   skipNoteButton.classList.add("hidden");
+  playAgainButton.classList.add("hidden");
+}
+
+function playCurrentNoteAgain() {
+  // Clear any ongoing analysis
+  if (analysisIntervalId) {
+    clearInterval(analysisIntervalId);
+    analysisIntervalId = null;
+  }
+  clearTimeout(noiseGateTimeoutId);
+  
+  // Reset displays
+  resultDisplay.textContent = "";
+  resetTuningMeter();
+  resetCurrentFrequencyDisplay();
+  
+  // Play the current note again
+  sessionManager.playCurrentNoteAgain();
 }
 
 function updateState(state) {
