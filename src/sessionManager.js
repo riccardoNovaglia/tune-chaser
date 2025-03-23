@@ -129,6 +129,13 @@ class SessionManager {
       }
     }, CONFIG.successFeedbackDuration);
   }
+  
+  skipCurrentNote() {
+    if (!this.sessionActive) return;
+    
+    // Don't increment score when skipping
+    this.selectNextNote();
+  }
 
   async setupMicrophoneAndAnalysis() {
     try {

@@ -10,6 +10,7 @@ import {
 
 // UI Elements
 const sessionToggleButton = document.getElementById("session-toggle-button");
+const skipNoteButton = document.getElementById("skip-note-button");
 const noteDisplay = document.getElementById("note-display");
 const instructionDisplay = document.getElementById("instruction-display");
 const resultDisplay = document.getElementById("result-display");
@@ -17,6 +18,7 @@ const scoreDisplay = document.getElementById("score-display");
 
 // Event listeners
 sessionToggleButton.addEventListener("click", toggleSession);
+skipNoteButton.addEventListener("click", skipCurrentNote);
 
 sessionManager.onStateChange = (state) => {
   updateState(state);
@@ -41,12 +43,29 @@ function toggleSession() {
     sessionToggleButton.textContent = "Start Session";
     sessionToggleButton.classList.remove("active");
     sessionToggleButton.classList.add("session-toggle");
+    skipNoteButton.classList.add("hidden");
   } else {
     startSession();
     sessionToggleButton.textContent = "Stop Session";
     sessionToggleButton.classList.remove("session-toggle");
     sessionToggleButton.classList.add("active");
+    skipNoteButton.classList.remove("hidden");
   }
+}
+
+function skipCurrentNote() {
+  resultDisplay.textContent = "Skipped note";
+  resetTuningMeter();
+  resetCurrentFrequencyDisplay();
+  
+  // Clear any ongoing analysis
+  if (analysisIntervalId) {
+    clearInterval(analysisIntervalId);
+    analysisIntervalId = null;
+  }
+  clearTimeout(noiseGateTimeoutId);
+  
+  sessionManager.skipCurrentNote();
 }
 
 function startSession() {
@@ -77,6 +96,9 @@ function stopSession() {
     analysisIntervalId = null;
   }
   clearTimeout(noiseGateTimeoutId); // Clear any existing noise gate timeout
+  
+  // Hide the skip button
+  skipNoteButton.classList.add("hidden");
 }
 
 function updateState(state) {
