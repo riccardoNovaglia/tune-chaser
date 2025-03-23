@@ -41,11 +41,13 @@
     <div id="controls">
       <div id="session-controls">
         <button id="session-toggle-button" class="session-toggle">Start Session</button>
-        <p id="score-display">Score: 0</p>
       </div>
       <div id="note-info">
-        <p id="note-display">Ready to start...</p>
-        <p id="state-display">Idle</p>
+        <div id="instruction-row">
+          <p id="instruction-display"></p>
+          <p id="score-display" class="hidden">Score: 0</p>
+        </div>
+        <p id="note-display"></p>
 
         <!-- Tuning meter -->
         <div id="tuning-container">

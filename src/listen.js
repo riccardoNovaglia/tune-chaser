@@ -11,7 +11,7 @@ import {
 // UI Elements
 const sessionToggleButton = document.getElementById("session-toggle-button");
 const noteDisplay = document.getElementById("note-display");
-const stateDisplay = document.getElementById("state-display");
+const instructionDisplay = document.getElementById("instruction-display");
 const resultDisplay = document.getElementById("result-display");
 const scoreDisplay = document.getElementById("score-display");
 
@@ -19,13 +19,16 @@ const scoreDisplay = document.getElementById("score-display");
 sessionToggleButton.addEventListener("click", toggleSession);
 
 sessionManager.onStateChange = (state) => {
-  stateDisplay.textContent = `State: ${state}`;
   updateState(state);
 };
 sessionManager.onNoteChange = (noteName, frequency) =>
   (noteDisplay.textContent = `Target Note: ${noteName} (${frequency.toFixed(2)} Hz)`);
-sessionManager.onScoreChange = (score) =>
-  (scoreDisplay.textContent = `Score: ${score}`);
+sessionManager.onScoreChange = (score) => {
+  scoreDisplay.textContent = `Score: ${score}`;
+  if (score > 0 && scoreDisplay.classList.contains('hidden')) {
+    scoreDisplay.classList.remove('hidden');
+  }
+};
 
 let analysisIntervalId = null;
 let noiseGateTimeoutId = null;
@@ -58,6 +61,11 @@ function startSession() {
   resetCurrentFrequencyDisplay();
   clearTimeout(noiseGateTimeoutId); // Clear any existing noise gate timeout
   sessionManager.startSession(selectedMicrophoneId);
+  
+  // Reset score display to hidden when starting a new session
+  if (sessionManager.getScore() === 0) {
+    scoreDisplay.classList.add('hidden');
+  }
 }
 
 function stopSession() {
@@ -72,6 +80,21 @@ function stopSession() {
 }
 
 function updateState(state) {
+  // Update instruction based on state
+  switch (state) {
+    case SessionState.PLAYING_REFERENCE:
+      instructionDisplay.textContent = "Listen to the reference note";
+      break;
+    case SessionState.LISTENING:
+      instructionDisplay.textContent = "Now play the same note";
+      break;
+    case SessionState.SUCCESS_FEEDBACK:
+      instructionDisplay.textContent = "Great job!";
+      break;
+    default:
+      instructionDisplay.textContent = "";
+  }
+
   // If we're in listening state, start the analysis
   if (state === SessionState.LISTENING) {
     noiseGateTimeoutId = setTimeout(startAnalysis, NOISE_GATE_DELAY);

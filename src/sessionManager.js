@@ -172,6 +172,10 @@ class SessionManager {
   isSessionActive() {
     return this.sessionActive;
   }
+  
+  getScore() {
+    return this.score;
+  }
 }
 
 // Create a singleton instance
