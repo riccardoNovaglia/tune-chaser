@@ -1,4 +1,4 @@
-import { playNote, stopNote, NOTES } from "./playNote.js";
+import { playNote, NOTES } from "./playNote.js";
 
 // Session states
 const SessionState = {
@@ -10,7 +10,7 @@ const SessionState = {
 
 // Configuration
 const CONFIG = {
-  notePlayDuration: 1000, // ms
+  notePlayDuration: 1, // s
   listenDuration: 3000, // ms
   successFeedbackDuration: 1000, // ms
 };
@@ -55,9 +55,6 @@ class SessionManager {
     this.sessionActive = false;
     this.state = SessionState.IDLE;
 
-    // Clean up audio resources
-    stopNote();
-
     if (this.stream) {
       this.stream.getTracks().forEach((track) => track.stop());
       this.stream = null;
@@ -96,7 +93,6 @@ class SessionManager {
     playNote(
       this.currentNote,
       this.currentNoteName,
-      this.audioContext,
       CONFIG.notePlayDuration,
       () => this.startListening(), // Callback when note finishes
     );
@@ -129,17 +125,17 @@ class SessionManager {
       }
     }, CONFIG.successFeedbackDuration);
   }
-  
+
   skipCurrentNote() {
     if (!this.sessionActive) return;
-    
+
     // Don't increment score when skipping
     this.selectNextNote();
   }
-  
+
   playCurrentNoteAgain() {
     if (!this.sessionActive) return;
-    
+
     // Play the current note again
     this.playReferenceNote();
   }
@@ -186,7 +182,7 @@ class SessionManager {
   isSessionActive() {
     return this.sessionActive;
   }
-  
+
   getScore() {
     return this.score;
   }
